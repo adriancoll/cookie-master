@@ -4,21 +4,45 @@ import type { AppContext, AppProps } from "next/app";
 
 import { CssBaseline, ThemeProvider } from "@mui/material";
 
-import { darkTheme, lightTheme } from "../themes";
+import { customTheme, darkTheme, lightTheme } from "../themes";
+import Cookies from "js-cookie";
+import { useEffect, useState } from "react";
+import { Theme } from "@mui/system";
 
-function MyApp({ Component, pageProps, ...rest }: AppProps) {
+const themes = {
+  dark: darkTheme,
+  light: lightTheme,
+  custom: customTheme,
+};
+
+export type Themes = "light" | "dark" | "custom";
+
+function MyApp({ Component, pageProps }: AppProps) {
+  const [currentTheme, setCurrentTheme] = useState<Theme>(lightTheme);
+
+  useEffect(() => {
+    const cookieTheme = (Cookies.get("theme") as Themes) || "light";
+    setCurrentTheme(themes[cookieTheme]);
+  }, []);
+
   return (
-    <ThemeProvider theme={darkTheme}>
+    <ThemeProvider theme={currentTheme}>
       <CssBaseline />
       <Component {...pageProps} />
     </ThemeProvider>
   );
 }
 
-MyApp.getInitialProps = async (appContext: AppContext) => {
-  const cookies = appContext.ctx.req ? (appContext.ctx.req.cookies as any) : { theme: "light" };
+// MyApp.getInitialProps = async (appContext: AppContext) => {
+//   const validThemes = ["light", "dark", "custom"];
 
-  return {};
-};
+//   const { theme } = appContext.ctx.req
+//     ? (appContext.ctx.req as any).cookies
+//     : { theme: "light" };
+
+//   return {
+//     theme: validThemes.includes(theme) ? theme : "dark",
+//   };
+// };
 
 export default MyApp;
